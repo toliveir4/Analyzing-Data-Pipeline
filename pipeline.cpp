@@ -31,9 +31,9 @@ int main() {
     for (int i = 0; i < nOp; i++) {
         Operation* op = new Operation();
 
-        if (operations.find(i+1) == operations.end())
+        if (operations.find(i + 1) == operations.end())
             operations[i + 1] = op;
-        else op = operations[i+1]; 
+        else op = operations[i + 1];
 
         cin >> op->T >> op->D;
 
@@ -51,16 +51,16 @@ int main() {
             if (operations.find(n) != operations.end()) operations[n]->dependables.push_back(i + 1);
             else {
                 operations[n] = new Operation();
-                operations[n]->dependables.push_back(i);
+                operations[n]->dependables.push_back(i + 1);
             }
         }
     }
 
-    /*for (auto& i : operations) {
+    for (auto& i : operations) {
         cout << i.first << " -> ";
         for (auto& j : i.second->dependables) cout << j << " ";
         cout << endl;
-    }*/
+    }
 
     int nLeaves = 0;
     for (auto& i : operations) {
