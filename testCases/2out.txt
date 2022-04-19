@@ -1,0 +1,4 @@
+INVALID
+
+Explanation
+There are two possible initial nodes, 1 and 3.

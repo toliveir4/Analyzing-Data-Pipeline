@@ -1,0 +1,10 @@
+13
+1
+2
+3
+4
+5
+
+Explanation
+The second operation to run could either be 2 or 3. However, the output description asks
+us to print the numerically smallest.
