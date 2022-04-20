@@ -1,5 +1,8 @@
 # Output file
-output.txt
+*.out_temp
+
+# Timefile
+/testCases/timefile
 
 # Prerequisites
 *.d

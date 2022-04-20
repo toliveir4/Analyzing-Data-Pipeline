@@ -1,4 +1,0 @@
-INVALID
-
-Explanation
-There are two possible terminal nodes, 5 and 6.

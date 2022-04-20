@@ -1,6 +1,6 @@
 #include <iostream>
 #include <vector>
-#include <unordered_map>
+#include <map>
 #include <algorithm>
 
 
@@ -11,14 +11,42 @@ class Operation {
 public:
     int T; // time needed to perform the operation
     int D; // number of dependencies
+    int visited; // denotes if the variable has been visited, is used to find cycles
 
     vector<int> dependables; // operations that depend from this one
 
-    Operation() {}
+    Operation() {
+        this->visited = 0;
+    }
 };
 
-unordered_map<int, Operation*> operations;
+map<int, Operation*> operations;
 
+
+int findOp(Operation* op) {
+    for (auto& o : operations) {
+        if (o.second == op) return o.first;
+    }
+    return 0;
+}
+
+bool hasCycle(Operation* op) {
+    if (op->visited < op->D || op->D == 0) {
+        //cout << findOp(op) << " -> ";
+        op->visited++;
+        //cout << op->visited << endl;
+        for (auto& o : op->dependables) {
+            if (hasCycle(operations[o]))
+                return true;
+            operations[o]->visited--;
+        }
+    }
+    else
+        return true;
+
+    op->visited--;
+    return false;
+}
 
 int main() {
     ios_base::sync_with_stdio(false);
@@ -56,11 +84,11 @@ int main() {
         }
     }
 
-    for (auto& i : operations) {
+    /*for (auto& i : operations) {
         cout << i.first << " -> ";
         for (auto& j : i.second->dependables) cout << j << " ";
         cout << endl;
-    }
+    }*/
 
     int nLeaves = 0;
     for (auto& i : operations) {
@@ -69,6 +97,16 @@ int main() {
         if (nLeaves > 1) {
             cout << "INVALID" << endl;
             return 0;
+        }
+    }
+
+    for (auto& i : operations) {
+        if (i.second->D == 0) {
+            if (hasCycle(i.second)) {
+                cout << "INVALID" << endl;
+                return 0;
+            }
+            break;
         }
     }
 

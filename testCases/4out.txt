@@ -1,4 +1,0 @@
-INVALID
-
-Explanation
-There is a cycle between nodes 2, 3, and 4.

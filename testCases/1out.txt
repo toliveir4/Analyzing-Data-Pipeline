@@ -1,4 +1,0 @@
-INVALID
-
-Explanation
-Node 4 is disconnected from nodes 1, 2, and 3.
