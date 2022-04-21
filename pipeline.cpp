@@ -24,7 +24,7 @@ map<int, Operation*> operations;
 
 
 int findOp(Operation* op) {
-    for (auto& o : operations) {
+    for (pair<int, Operation*> o : operations) {
         if (o.second == op) return o.first;
     }
     return 0;
@@ -35,7 +35,7 @@ bool hasCycle(Operation* op) {
         //cout << findOp(op) << " -> ";
         op->visited++;
         //cout << op->visited << endl;
-        for (auto& o : op->dependables) {
+        for (int o : op->dependables) {
             if (hasCycle(operations[o]))
                 return true;
             operations[o]->visited--;
@@ -84,6 +84,9 @@ int main() {
         }
     }
 
+    int stat; // statistic that should be computed if the data pipeline is valid
+    cin >> stat;
+
     /*for (auto& i : operations) {
         cout << i.first << " -> ";
         for (auto& j : i.second->dependables) cout << j << " ";
@@ -91,8 +94,8 @@ int main() {
     }*/
 
     int nLeaves = 0;
-    for (auto& i : operations) {
-        if (i.second->dependables.size() == 0) nLeaves++;
+    for (pair<int, Operation*> o : operations) {
+        if (o.second->dependables.size() == 0) nLeaves++;
 
         if (nLeaves > 1) {
             cout << "INVALID" << endl;
@@ -100,18 +103,15 @@ int main() {
         }
     }
 
-    for (auto& i : operations) {
-        if (i.second->D == 0) {
-            if (hasCycle(i.second)) {
+    for (pair<int, Operation*> o : operations) {
+        if (o.second->D == 0) {
+            if (hasCycle(o.second)) {
                 cout << "INVALID" << endl;
                 return 0;
             }
             break;
         }
     }
-
-    int stat; // statistic that should be computed if the data pipeline is valid
-    cin >> stat;
 
     switch (stat) {
     case 0:
@@ -127,7 +127,6 @@ int main() {
 
         break;
     }
-
 
     return 0;
 }
