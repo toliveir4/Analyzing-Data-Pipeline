@@ -1,6 +1,6 @@
 #include <iostream>
 #include <vector>
-#include <map>
+#include <unordered_map>
 #include <algorithm>
 
 
@@ -14,13 +14,14 @@ public:
     int visited; // denotes if the variable has been visited, is used to find cycles
 
     vector<int> dependables; // operations that depend from this one
+    vector<int> dependencies;
 
     Operation() {
         this->visited = 0;
     }
 };
 
-map<int, Operation*> operations;
+unordered_map<int, Operation*> operations;
 
 
 int findOp(Operation* op) {
@@ -67,7 +68,6 @@ int main() {
 
         if (op->D == 0) initialNodes++;
 
-
         if (initialNodes > 1) {
             cout << "INVALID" << endl;
             return 0;
@@ -81,17 +81,18 @@ int main() {
                 operations[n] = new Operation();
                 operations[n]->dependables.push_back(i + 1);
             }
+            operations[i + 1]->dependencies.push_back(n);
         }
     }
 
     int stat; // statistic that should be computed if the data pipeline is valid
     cin >> stat;
 
-    /*for (auto& i : operations) {
+    for (auto& i : operations) {
         cout << i.first << " -> ";
-        for (auto& j : i.second->dependables) cout << j << " ";
+        for (auto& j : i.second->dependencies) cout << j << " ";
         cout << endl;
-    }*/
+    }
 
     int nLeaves = 0;
     for (pair<int, Operation*> o : operations) {
@@ -101,15 +102,12 @@ int main() {
             cout << "INVALID" << endl;
             return 0;
         }
-    }
 
-    for (pair<int, Operation*> o : operations) {
         if (o.second->D == 0) {
             if (hasCycle(o.second)) {
                 cout << "INVALID" << endl;
                 return 0;
             }
-            break;
         }
     }
 
