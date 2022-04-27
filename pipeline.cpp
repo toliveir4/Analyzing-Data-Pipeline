@@ -2,6 +2,7 @@
 #include <vector>
 #include <unordered_map>
 #include <algorithm>
+#include <queue>
 
 
 using namespace std;
@@ -22,6 +23,7 @@ public:
 };
 
 unordered_map<int, Operation*> operations;
+pair<int, Operation*> startOp;
 
 
 int findOp(Operation* op) {
@@ -49,6 +51,20 @@ bool hasCycle(Operation* op) {
     return false;
 }
 
+void stat1(int op) {
+    priority_queue<int, vector<int>> queue;
+    queue.push(op);
+
+    while (!queue.empty()) {
+        int id = queue.top();
+        Operation* o = operations[id];
+        queue.pop();
+
+
+    }
+
+}
+
 int main() {
     ios_base::sync_with_stdio(false);
     cin.tie(nullptr);
@@ -66,7 +82,11 @@ int main() {
 
         cin >> op->T >> op->D;
 
-        if (op->D == 0) initialNodes++;
+        if (op->D == 0) {
+            initialNodes++;
+            startOp.first = i + 1;
+            startOp.second = op;
+        }
 
         if (initialNodes > 1) {
             cout << "INVALID" << endl;
@@ -88,11 +108,11 @@ int main() {
     int stat; // statistic that should be computed if the data pipeline is valid
     cin >> stat;
 
-    for (auto& i : operations) {
+    /*for (auto& i : operations) {
         cout << i.first << " -> ";
         for (auto& j : i.second->dependencies) cout << j << " ";
         cout << endl;
-    }
+    }*/
 
     int nLeaves = 0;
     for (pair<int, Operation*> o : operations) {
@@ -102,13 +122,11 @@ int main() {
             cout << "INVALID" << endl;
             return 0;
         }
+    }
 
-        if (o.second->D == 0) {
-            if (hasCycle(o.second)) {
-                cout << "INVALID" << endl;
-                return 0;
-            }
-        }
+    if (hasCycle(startOp.second)) {
+        cout << "INVALID" << endl;
+        return 0;
     }
 
     switch (stat) {
@@ -116,7 +134,7 @@ int main() {
         cout << "VALID" << endl;
         break;
     case 1:
-
+        stat1(startOp.first);
         break;
     case 2:
 
@@ -124,7 +142,7 @@ int main() {
     case 3:
 
         break;
-    }
+        }
 
-    return 0;
-}
+        return 0;
+    }

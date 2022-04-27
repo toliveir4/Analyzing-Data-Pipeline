@@ -1,5 +1,8 @@
-# Output file
+# Output files when running shell script 
 *.out_temp
+
+# Output File when running the Makefile
+output.txt
 
 # Timefile
 /testCases/timefile

@@ -10,7 +10,7 @@
 #  Flags
 #  -c apagar os ficheiros *casotest*.out_temp após correr cada caso de teste
 
-echo make
+echo g++ -std=c++17 -Wall -Wextra -O2 -o ./e.out pipeline.cpp -lm
 
 TIMEFILE="testCases/timefile"
 
