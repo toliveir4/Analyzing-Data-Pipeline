@@ -11,11 +11,12 @@ using namespace std;
 class Operation {
 public:
     int T; // time needed to perform the operation
-    int D; // number of dependencies
+    int D; // number of parents
     int visited; // denotes if the variable has been visited, is used to find cycles
 
-    vector<int> dependables; // operations that depend from this one
-    vector<int> dependencies;
+
+    vector<int> sons; // operations that depend from this one
+    vector<int> parents;
 
     Operation() {
         this->visited = 0;
@@ -23,7 +24,9 @@ public:
 };
 
 unordered_map<int, Operation*> operations;
-pair<int, Operation*> startOp;
+pair<int, Operation*> initialOperation;
+vector<int> processed;
+vector<int> bottlenecks;
 
 
 int findOp(Operation* op) {
@@ -35,10 +38,8 @@ int findOp(Operation* op) {
 
 bool hasCycle(Operation* op) {
     if (op->visited < op->D || op->D == 0) {
-        //cout << findOp(op) << " -> ";
         op->visited++;
-        //cout << op->visited << endl;
-        for (int o : op->dependables) {
+        for (int o : op->sons) {
             if (hasCycle(operations[o]))
                 return true;
             operations[o]->visited--;
@@ -51,18 +52,75 @@ bool hasCycle(Operation* op) {
     return false;
 }
 
-void stat1(int op) {
-    priority_queue<int, vector<int>> queue;
-    queue.push(op);
+bool isProcessed(int op) {
+    for (int o : processed) {
+        if (op == o) return true;
+    }
+    return false;
+}
+
+void statistic1() {
+    int time = 0;
+    priority_queue<int, vector<int>, greater<int>>queue;
+    queue.push(initialOperation.first);
 
     while (!queue.empty()) {
         int id = queue.top();
         Operation* o = operations[id];
         queue.pop();
 
+        int i = 0;
+        for (int parent : o->parents) {
+            if (isProcessed(parent)) i++;
+        }
+        if (i == o->D) {
+            processed.push_back(id);
+            time += o->T;
+        }
 
+        for (int son : o->sons) {
+            int j = 0;
+            for (int parent : operations[son]->parents) {
+                if (isProcessed(parent)) j++;
+            }
+
+            if (j == operations[son]->D) queue.push(son);
+        }
     }
 
+    cout << time << endl;
+    for (int id : processed) cout << id << endl;
+}
+
+void statistic3() {
+    cout << initialOperation.first << endl;
+
+    priority_queue<int, vector<int>, greater<int>>queue;
+    queue.push(initialOperation.first);
+
+    while (!queue.empty()) {
+        int id = queue.top();
+        Operation* o = operations[id];
+        queue.pop();
+
+        int i = 0;
+        for (int parent : o->parents) {
+            if (isProcessed(parent)) i++;
+        }
+        if (i == o->D) {
+            processed.push_back(id);
+            if (o->D > 1 || o->sons.empty()) 
+                cout << id << endl;
+        }
+
+        for (int son : o->sons) {
+            int j = 0;
+            for (int parent : operations[son]->parents) {
+                if (isProcessed(parent)) j++;
+            }
+            if (j == operations[son]->D) queue.push(son);
+        }
+    }
 }
 
 int main() {
@@ -84,8 +142,8 @@ int main() {
 
         if (op->D == 0) {
             initialNodes++;
-            startOp.first = i + 1;
-            startOp.second = op;
+            initialOperation.first = i + 1;
+            initialOperation.second = op;
         }
 
         if (initialNodes > 1) {
@@ -96,12 +154,12 @@ int main() {
         for (int j = 0; j < op->D; j++) {
             int n;
             cin >> n;
-            if (operations.find(n) != operations.end()) operations[n]->dependables.push_back(i + 1);
+            if (operations.find(n) != operations.end()) operations[n]->sons.push_back(i + 1);
             else {
                 operations[n] = new Operation();
-                operations[n]->dependables.push_back(i + 1);
+                operations[n]->sons.push_back(i + 1);
             }
-            operations[i + 1]->dependencies.push_back(n);
+            operations[i + 1]->parents.push_back(n);
         }
     }
 
@@ -110,13 +168,13 @@ int main() {
 
     /*for (auto& i : operations) {
         cout << i.first << " -> ";
-        for (auto& j : i.second->dependencies) cout << j << " ";
+        for (auto& j : i.second->parents) cout << j << " ";
         cout << endl;
     }*/
 
     int nLeaves = 0;
     for (pair<int, Operation*> o : operations) {
-        if (o.second->dependables.size() == 0) nLeaves++;
+        if (o.second->sons.size() == 0) nLeaves++;
 
         if (nLeaves > 1) {
             cout << "INVALID" << endl;
@@ -124,25 +182,25 @@ int main() {
         }
     }
 
-    if (hasCycle(startOp.second)) {
+    /*if (hasCycle(initialOperation.second)) {
         cout << "INVALID" << endl;
         return 0;
-    }
+    }*/
 
     switch (stat) {
     case 0:
         cout << "VALID" << endl;
         break;
     case 1:
-        stat1(startOp.first);
+        statistic1();
         break;
     case 2:
 
         break;
     case 3:
-
+        statistic3();
         break;
-        }
-
-        return 0;
     }
+
+    return 0;
+}
