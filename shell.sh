@@ -10,11 +10,11 @@
 #  Flags
 #  -c apagar os ficheiros *casotest*.out_temp após correr cada caso de teste
 
-echo g++ -std=c++17 -Wall -Wextra -O2 -o ./e.out pipeline.cpp -lm
+g++ -std=c++17 -Wall -Wextra -O2 -o e.out pipeline.cpp -lm
 
 TIMEFILE="testCases/timefile"
 
-out=`ls ./testCases/*.txt`
+out=`ls ./inputs2/*.txt`
 for ef in $out
 do
    echo "$ef"

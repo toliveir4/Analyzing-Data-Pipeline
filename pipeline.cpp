@@ -14,12 +14,14 @@ public:
     int D; // number of parents
     int visited; // denotes if the variable has been visited, is used to find cycles
 
+    bool processed;
 
     vector<int> sons; // operations that depend from this one
     vector<int> parents;
 
     Operation() {
         this->visited = 0;
+        this->processed = false;
     }
 };
 
@@ -28,6 +30,8 @@ pair<int, Operation*> initialOperation;
 vector<int> processed;
 vector<int> bottlenecks;
 
+vector<int> toProcess; //queue a ser usada na estatistica 2
+vector<int> toProcessAux;
 
 int findOp(Operation* op) {
     for (pair<int, Operation*> o : operations) {
@@ -91,6 +95,52 @@ void statistic1() {
     cout << time << endl;
     for (int id : processed) cout << id << endl;
 }
+
+void statistic2aux(int index) {
+    int count = 0; //num de pais processados
+
+    for (auto& i: operations[index]->parents) {
+        if (operations[i]->processed == false) {
+            statistic2aux(i);
+        } else {
+            count++;
+        }
+    }
+
+    if (count == operations[index]->D) {
+        if (find(toProcessAux.begin(), toProcessAux.end(), index) == toProcessAux.end()) toProcessAux.push_back(index);
+    }
+    
+    return;
+}
+
+void statistic2() {
+    int time = 0;
+    //vector<int> toProcess; //operacoes a serem processadas simultaneamente
+    //vector<int> toProcessAux;
+
+    toProcess.push_back(initialOperation.first);
+
+    while(!toProcess.empty()) {
+        toProcessAux.clear();
+
+        //processa os nos do vector e avanca para os filhos
+        for(auto& i: toProcess) {
+            time += operations[i]->T;
+            operations[i]->processed = true;
+        }
+
+        for(auto& i: toProcess) {
+            for (auto& j: operations[i]->sons) {
+                statistic2aux(j);
+            }
+        }
+        
+        toProcess = toProcessAux;
+    }
+
+    cout << time << endl;
+}   
 
 void statistic3() {
     cout << initialOperation.first << endl;
@@ -195,7 +245,7 @@ int main() {
         statistic1();
         break;
     case 2:
-
+        statistic2();
         break;
     case 3:
         statistic3();
