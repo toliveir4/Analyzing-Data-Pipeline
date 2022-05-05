@@ -29,8 +29,11 @@ pair<int, Operation*> initialOperation;
 pair<int, Operation*> lastOperation;
 vector<int> processedOp;
 vector<int> bottlenecks;
+
+
 vector<int> toProcess; //queue a ser usada na estatistica 2
 vector<int> toProcessAux;
+int t;
 
 /*int findOp(Operation* op) {
     for (pair<int, Operation*> o : operations) {
@@ -92,6 +95,8 @@ void statistic1() {
 }
 
 void statistic2aux(int index) {
+    if (operations[index]->processed == true) return;
+
     int count = 0; //num de pais processados
 
     for (int i : operations[index]->parents) {
@@ -104,13 +109,27 @@ void statistic2aux(int index) {
     if (count == operations[index]->D) {
         if (find(toProcessAux.begin(), toProcessAux.end(), index) == toProcessAux.end())
             toProcessAux.push_back(index);
+
     }
 
     return;
 }
 
+void statistic2sons(int index, int timeMax, int currentTime) {
+    if(operations[index]->T + currentTime > timeMax || operations[index]->processed == true) { //nao e possivel processar este no
+        return;
+    } else {
+        operations[index]->processed = true;
+        //t += operations[index]->T;
+        currentTime += operations[index]->T;
+        toProcessAux.push_back(index);
+
+        for (int i: operations[index]->sons) statistic2sons(i, timeMax, currentTime);
+    }
+}
+
 void statistic2() {
-    int time = 0;
+    t = 0;
     //vector<int> toProcess; //operacoes a serem processadas simultaneamente
     //vector<int> toProcessAux;
 
@@ -119,25 +138,36 @@ void statistic2() {
     while (!toProcess.empty()) {
         toProcessAux.clear();
 
+        int timeMax = 0;
+        int maxIndex = 0;
         //processa os nos do vector e avanca para os filhos
-        int max = 0;
         for (int i : toProcess) {
-            operations[i]->processed = true;
-            if (max <= operations[i]->T)
-                max = operations[i]->T;
-        }
-        time += max;
+            if(operations[i]->processed == false) {
+                operations[i]->processed = true;
+                //t += operations[i]->T;
 
-        for (int i : toProcess) {
+                if (timeMax < operations[i]->T) {    
+                    timeMax = operations[i]->T;
+                    maxIndex = i;
+                }
+            }
+        }
+        t += timeMax;
+
+        for (int i: toProcess) {
             for (int j : operations[i]->sons) {
                 statistic2aux(j);
             }
         }
 
+        for (int i: toProcessAux) {
+            if (i != maxIndex) statistic2sons(i, timeMax, operations[i]->T);
+        }
+
         toProcess = toProcessAux;
     }
 
-    cout << time << endl;
+    cout << t << endl;
 }
 
 void statistic3() {
