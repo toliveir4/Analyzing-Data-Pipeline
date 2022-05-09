@@ -7,7 +7,6 @@
 
 using namespace std;
 
-
 class Operation {
 public:
     int T; // time needed to perform the operation
@@ -29,7 +28,7 @@ pair<int, Operation*> initialOperation;
 pair<int, Operation*> lastOperation;
 vector<int> processedOp;
 vector<int> bottlenecks;
-
+vector<int> nonProcessed;
 
 vector<int> toProcess; //queue a ser usada na estatistica 2
 vector<int> toProcessAux;
@@ -68,17 +67,9 @@ void statistic1() {
         Operation* o = operations[id];
         queue.pop();
 
-        int i = 0;
-        for (int parent : o->parents) {
-            if (operations[parent]->processed) i++;
-            else break;
-        }
-
-        if (i == o->D) {
-            o->processed = true;
-            processedOp.push_back(id);
-            time += o->T;
-        }
+        o->processed = true;
+        processedOp.push_back(id);
+        time += o->T;
 
         for (int son : o->sons) {
             int j = 0;
@@ -94,85 +85,7 @@ void statistic1() {
     for (int id : processedOp) cout << id << endl;
 }
 
-void statistic2aux(int index) {
-    if (operations[index]->processed == true) return;
-
-    int count = 0; //num de pais processados
-
-    for (int i : operations[index]->parents) {
-        if (operations[i]->processed == false)
-            statistic2aux(i);
-        else
-            count++;
-    }
-
-    if (count == operations[index]->D) {
-        if (find(toProcessAux.begin(), toProcessAux.end(), index) == toProcessAux.end())
-            toProcessAux.push_back(index);
-
-    }
-
-    return;
-}
-
-void statistic2sons(int index, int timeMax, int currentTime) {
-    if(operations[index]->T + currentTime > timeMax || operations[index]->processed == true) { //nao e possivel processar este no
-        return;
-    } else {
-        operations[index]->processed = true;
-        //t += operations[index]->T;
-        currentTime += operations[index]->T;
-        toProcessAux.push_back(index);
-
-        for (int i: operations[index]->sons) statistic2sons(i, timeMax, currentTime);
-    }
-}
-
 void statistic2() {
-    t = 0;
-    //vector<int> toProcess; //operacoes a serem processadas simultaneamente
-    //vector<int> toProcessAux;
-
-    toProcess.push_back(initialOperation.first);
-
-    while (!toProcess.empty()) {
-        toProcessAux.clear();
-
-        int timeMax = 0;
-        int maxIndex = 0;
-        //processa os nos do vector e avanca para os filhos
-        for (int i : toProcess) {
-            if(operations[i]->processed == false) {
-                operations[i]->processed = true;
-                //t += operations[i]->T;
-
-                if (timeMax < operations[i]->T) {    
-                    timeMax = operations[i]->T;
-                    maxIndex = i;
-                }
-            }
-        }
-        t += timeMax;
-
-        for (int i: toProcess) {
-            for (int j : operations[i]->sons) {
-                statistic2aux(j);
-            }
-        }
-
-        for (int i: toProcessAux) {
-            if (i != maxIndex) statistic2sons(i, timeMax, operations[i]->T);
-        }
-
-        toProcess = toProcessAux;
-    }
-
-    cout << t << endl;
-}
-
-void statistic3() {
-    cout << initialOperation.first << endl;
-
     priority_queue<int, vector<int>, greater<int>>queue;
     queue.push(initialOperation.first);
 
@@ -181,32 +94,91 @@ void statistic3() {
         Operation* o = operations[id];
         queue.pop();
 
-        int i = 0;
-        for (int parent : o->parents) {
-            if (operations[parent]->processed) i++;
-            else break;
+        o->processed = true;
+
+        for (int son : o->sons) {
+            int j = 0;
+            int max = 0;
+            for (int parent : operations[son]->parents) {
+                if (operations[parent]->processed) {
+                    if (max < operations[parent]->T)
+                        max = operations[parent]->T;
+                    j++;
+                }
+            }
+
+            if (j == operations[son]->D) {
+                operations[son]->T += max;
+                queue.push(son);
+            }
         }
-        if (i == o->D)
-            o->processed = true;
+    }
+
+    cout << lastOperation.second->T << endl;
+}
+
+void isBottleneck(Operation* op) {
+    for (int o : op->sons) {
+        operations[o]->processed = true;
+        isBottleneck(operations[o]);
+    }
+}
+
+void isBottleneckAux(Operation* op) {
+    for (int o : op->parents) {
+        operations[o]->processed = true;
+        isBottleneckAux(operations[o]);
+    }
+}
+
+void statistic3() {
+    queue<int> queue;
+    queue.push(initialOperation.first);
+    bottlenecks.push_back(initialOperation.first);
+
+    while (!queue.empty()) {
+        int id = queue.front();
+        Operation* o = operations[id];
+        o->processed = true;
+        processedOp.push_back(id);
+        queue.pop();
+
+        if (o->D != 0 && !o->sons.empty()) {
+            isBottleneck(o);
+            isBottleneckAux(o);
+            int count = 0;
+            for (pair<int, Operation*> i : operations) {
+                if (i.second->processed == false)
+                    break;
+                count++;
+            }
+            if (count == (int)operations.size())
+                bottlenecks.push_back(id);
+
+            for (pair<int, Operation*> i : operations) {
+                i.second->processed = false;
+            }
+
+        }
 
         for (int son : o->sons) {
             int j = 0;
             for (int parent : operations[son]->parents) {
-                if (operations[parent]->processed) j++;
-                else break;
+                if (find(processedOp.begin(), processedOp.end(), parent) != processedOp.end()) j++;
             }
+
             if (j == operations[son]->D) queue.push(son);
         }
     }
 
-    for (int id : bottlenecks) cout << id << endl;
+    bottlenecks.push_back(lastOperation.first);
 
-    cout << lastOperation.first << endl;
+    for (int id : bottlenecks) cout << id << endl;
 }
 
 int main() {
-    ios_base::sync_with_stdio(false);
-    cin.tie(nullptr);
+    ios_base::sync_with_stdio(0);
+    cin.tie(0);
 
     int nOp; // number of operations
     cin >> nOp;

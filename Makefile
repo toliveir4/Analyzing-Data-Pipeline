@@ -1,7 +1,7 @@
 CPPFILE = pipeline.cpp
 EXE = e.out
-TESTCASE = testCases/4.txt
-TESTOUTPUT = testCases/4out
+TESTCASE = testCases/alex_input2.txt
+TESTOUTPUT = testCases/alex_input2out
 OUTPUT = output.txt
 DIFF = testCases/diff.txt
 TIMEFILE = testCases/timefile

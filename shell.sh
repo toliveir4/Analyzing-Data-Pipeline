@@ -14,7 +14,7 @@ g++ -std=c++17 -Wall -Wextra -O2 -o e.out pipeline.cpp -lm
 
 TIMEFILE="testCases/timefile"
 
-out=`ls ./inputs2/*.txt`
+out=`ls ./testCases/*.txt`
 for ef in $out
 do
    echo "$ef"
