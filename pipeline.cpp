@@ -41,7 +41,7 @@ int t;
     return 0;
 }*/
 
-bool hasCycle(Operation* op) {
+/*bool hasCycle(Operation* op) {
     if (op->visited < op->D || op->D == 0) {
         op->visited++;
         for (int o : op->sons) {
@@ -55,6 +55,42 @@ bool hasCycle(Operation* op) {
 
     op->visited--;
     return false;
+}*/
+
+
+bool hasCycle() {
+    //int time = 0;
+    priority_queue<int, vector<int>, greater<int>>queue;
+    queue.push(initialOperation.first);
+
+    while (!queue.empty()) {
+        int id = queue.top();
+        Operation* o = operations[id];
+        queue.pop();
+
+        o->processed = true;
+        //processedOp.push_back(id);
+        //time += o->T;
+
+        for (int son : o->sons) {
+            int j = 0;
+            for (int parent : operations[son]->parents) {
+                if (operations[parent]->processed) j++;
+            }
+
+            if (j == operations[son]->D) queue.push(son);
+        }
+    }
+
+    for (pair<int, Operation*> i : operations) {
+        if (!i.second->processed) return true;
+        i.second->processed = false;
+    }
+
+
+    return false;
+    //cout << time << endl;
+    //for (int id : processedOp) cout << id << endl;
 }
 
 void statistic1() {
@@ -240,6 +276,10 @@ int main() {
     }
 
     /*----- FALTA DETECAO DE CICLOS -----*/
+    if (hasCycle() == true) {
+        cout << "INVALID\n";
+        return 0;
+    }
 
     switch (stat) {
     case 0:
