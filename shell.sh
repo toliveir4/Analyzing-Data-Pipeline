@@ -1,10 +1,9 @@
 #  Utilização
-#  Adicionar gocompiler (compilado) ao PATH
-#  (uma boa opção é adicionar a directoria da meta1 ao PATH)
-#  Após compilar executar este script
+#  Executar este script
 #
 #  Funcionalidade
-#  Compara todos os casos de teste na pasta meta1
+#  Compila o script em cpp
+#  Compara todos os casos de teste nas pastas testCases e inputs2
 #  Cria o ficheiro *casoteste*.out_temp com resultado de correr cada caso de teste
 #
 #  Flags
@@ -12,9 +11,9 @@
 
 g++ -std=c++17 -Wall -Wextra -O2 -o e.out pipeline.cpp -lm
 
-TIMEFILE="testCases/timefile"
+TIMEFILE="timefile"
 
-out=`ls ./testCases/*.txt`
+out=`ls ./inputs2/*.txt && ls ./testCases/*.txt`
 for ef in $out
 do
    echo "$ef"

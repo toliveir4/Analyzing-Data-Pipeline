@@ -5,7 +5,7 @@
 output.txt
 
 # Timefile
-/testCases/timefile
+timefile
 
 # Prerequisites
 *.d

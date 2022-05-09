@@ -4,7 +4,6 @@
 #include <algorithm>
 #include <queue>
 
-
 using namespace std;
 
 class Operation {
@@ -18,7 +17,6 @@ public:
     vector<int> parents;
 
     Operation() {
-        this->visited = 0;
         this->processed = false;
     }
 };
@@ -27,50 +25,17 @@ unordered_map<int, Operation*> operations;
 pair<int, Operation*> initialOperation;
 pair<int, Operation*> lastOperation;
 vector<int> processedOp;
-vector<int> bottlenecks;
-vector<int> nonProcessed;
-
-vector<int> toProcess; //queue a ser usada na estatistica 2
-vector<int> toProcessAux;
-int t;
-
-/*int findOp(Operation* op) {
-    for (pair<int, Operation*> o : operations) {
-        if (o.second == op) return o.first;
-    }
-    return 0;
-}*/
-
-/*bool hasCycle(Operation* op) {
-    if (op->visited < op->D || op->D == 0) {
-        op->visited++;
-        for (int o : op->sons) {
-            if (hasCycle(operations[o]))
-                return true;
-            operations[o]->visited--;
-        }
-    }
-    else
-        return true;
-
-    op->visited--;
-    return false;
-}*/
-
 
 bool hasCycle() {
-    //int time = 0;
-    priority_queue<int, vector<int>, greater<int>>queue;
+    queue<int> queue;
     queue.push(initialOperation.first);
 
     while (!queue.empty()) {
-        int id = queue.top();
+        int id = queue.front();
         Operation* o = operations[id];
         queue.pop();
 
         o->processed = true;
-        //processedOp.push_back(id);
-        //time += o->T;
 
         for (int son : o->sons) {
             int j = 0;
@@ -87,15 +52,12 @@ bool hasCycle() {
         i.second->processed = false;
     }
 
-
     return false;
-    //cout << time << endl;
-    //for (int id : processedOp) cout << id << endl;
 }
 
 void statistic1() {
     int time = 0;
-    priority_queue<int, vector<int>, greater<int>>queue;
+    priority_queue<int, vector<int>, greater<int>> queue;
     queue.push(initialOperation.first);
 
     while (!queue.empty()) {
@@ -122,11 +84,11 @@ void statistic1() {
 }
 
 void statistic2() {
-    priority_queue<int, vector<int>, greater<int>>queue;
+    queue<int> queue;
     queue.push(initialOperation.first);
 
     while (!queue.empty()) {
-        int id = queue.top();
+        int id = queue.front();
         Operation* o = operations[id];
         queue.pop();
 
@@ -170,7 +132,7 @@ void isBottleneckAux(Operation* op) {
 void statistic3() {
     queue<int> queue;
     queue.push(initialOperation.first);
-    bottlenecks.push_back(initialOperation.first);
+    cout << initialOperation.first << endl;
 
     while (!queue.empty()) {
         int id = queue.front();
@@ -189,12 +151,11 @@ void statistic3() {
                 count++;
             }
             if (count == (int)operations.size())
-                bottlenecks.push_back(id);
+                cout << id << endl;
 
             for (pair<int, Operation*> i : operations) {
                 i.second->processed = false;
             }
-
         }
 
         for (int son : o->sons) {
@@ -207,9 +168,7 @@ void statistic3() {
         }
     }
 
-    bottlenecks.push_back(lastOperation.first);
-
-    for (int id : bottlenecks) cout << id << endl;
+    cout << lastOperation.first << endl;
 }
 
 int main() {
@@ -252,15 +211,6 @@ int main() {
         }
     }
 
-    int stat; // statistic that should be computed if the data pipeline is valid
-    cin >> stat;
-
-    /*for (auto& i : operations) {
-        cout << i.first << " -> ";
-        for (auto& j : i.second->parents) cout << j << " ";
-        cout << endl;
-    }*/
-
     int nLeaves = 0;
     for (pair<int, Operation*> o : operations) {
         if (o.second->sons.size() == 0) {
@@ -275,11 +225,13 @@ int main() {
         }
     }
 
-    /*----- FALTA DETECAO DE CICLOS -----*/
     if (hasCycle() == true) {
         cout << "INVALID\n";
         return 0;
     }
+
+    int stat; // statistic that should be computed if the data pipeline is valid
+    cin >> stat;
 
     switch (stat) {
     case 0:
