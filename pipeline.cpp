@@ -115,17 +115,23 @@ void statistic2() {
     cout << lastOperation.second->T << endl;
 }
 
-void isBottleneck(Operation* op) {
-    for (int o : op->sons) {
-        operations[o]->processed = true;
-        isBottleneck(operations[o]);
+void isBottleneck(int id) {
+    for (int o : operations[id]->sons) {
+        if (find(processedOp.begin(), processedOp.end(), o) == processedOp.end()) {
+            processedOp.push_back(o);
+            isBottleneck(o);
+        }
+
     }
 }
 
-void isBottleneckAux(Operation* op) {
-    for (int o : op->parents) {
-        operations[o]->processed = true;
-        isBottleneckAux(operations[o]);
+void isBottleneckAux(int id) {
+    for (int o : operations[id]->parents) {
+        if (find(processedOp.begin(), processedOp.end(), o) == processedOp.end()) {
+            processedOp.push_back(o);
+            isBottleneckAux(o);
+        }
+
     }
 }
 
@@ -138,30 +144,22 @@ void statistic3() {
         int id = queue.front();
         Operation* o = operations[id];
         o->processed = true;
-        processedOp.push_back(id);
         queue.pop();
 
+        processedOp.push_back(id);
         if (o->D != 0 && !o->sons.empty()) {
-            isBottleneck(o);
-            isBottleneckAux(o);
-            int count = 0;
-            for (pair<int, Operation*> i : operations) {
-                if (i.second->processed == false)
-                    break;
-                count++;
-            }
-            if (count == (int)operations.size())
+            isBottleneck(id);
+            isBottleneckAux(id);
+            //cout << id << " -> " << processedOp.size() << " " << operations.size() << endl;
+            if (processedOp.size() == operations.size())
                 cout << id << endl;
-
-            for (pair<int, Operation*> i : operations) {
-                i.second->processed = false;
-            }
         }
+        processedOp.clear();
 
         for (int son : o->sons) {
             int j = 0;
             for (int parent : operations[son]->parents) {
-                if (find(processedOp.begin(), processedOp.end(), parent) != processedOp.end()) j++;
+                if (operations[parent]->processed) j++;
             }
 
             if (j == operations[son]->D) queue.push(son);
@@ -194,11 +192,6 @@ int main() {
             initialOperation.second = op;
         }
 
-        if (initialNodes > 1) {
-            cout << "INVALID" << endl;
-            return 0;
-        }
-
         for (int j = 0; j < op->D; j++) {
             int n;
             cin >> n;
@@ -219,7 +212,7 @@ int main() {
             lastOperation.second = o.second;
         }
 
-        if (nLeaves > 1) {
+        if (nLeaves > 1 || initialNodes != 1) {
             cout << "INVALID" << endl;
             return 0;
         }
